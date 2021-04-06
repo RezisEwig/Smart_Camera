@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             resized = Bitmap.createScaledBitmap(bitmap1, LR_IMAGE_WIDTH, LR_IMAGE_HEIGHT, true);
             Log.d(TAG, "onCreate:fsdafsadfsafasfdsfas " + resized.getWidth() + resized.getHeight());
 
-            bitmap1.getPixels(
+            resized.getPixels(
                     lowResRGB, 0, LR_IMAGE_WIDTH, 0, 0, LR_IMAGE_WIDTH, LR_IMAGE_HEIGHT);
             Log.d(TAG, "onCreate: asdasf" + lowResRGB.length);
         } catch (IOException e) {
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                     //input[i * 3 + 2] = (val & 0xFF)  ;
                     input[0][k][j][0] = ((val >> 16) & 0xFF) ;
                     input[0][k][j][1] = (((val >> 8) & 0xFF)) ;
-                    input[0][k][j][2] = (val & 0xFF)  ;
+                    input[0][k][j][2] = (val & 0xFF) ;
 
                     //Log.d(TAG, "onClick: value" + input[0][k][j][0] + input[0][k][j][1] + input[0][k][j][2]);
 
