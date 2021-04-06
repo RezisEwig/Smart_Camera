@@ -15,3 +15,5 @@
 local.properties
 *.tflite
 *.jpg
+!500.jpg
+!v2.1_300.tflite
