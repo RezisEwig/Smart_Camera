@@ -13,5 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
-.tflite
-.jpg
+*.tflite
+*.jpg
