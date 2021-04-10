@@ -20,19 +20,23 @@ import java.io.InputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 //import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
+import static androidx.core.math.MathUtils.clamp;
+import static java.lang.Math.round;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "SuperResolution";
-    private static final String MODEL_NAME = "v2.1_300.tflite";
+    private static final String MODEL_NAME = "v5_300.tflite";
     private static final int LR_IMAGE_HEIGHT = 300;
     private static final int LR_IMAGE_WIDTH = 300;
     private static final int UPSCALE_FACTOR = 4;
     private static final int SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
     private static final int SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
-    private static final String LR_IMG_1 = "500.jpg";
+    private static final String LR_IMG_1 = "landscape.jpg";
     public Bitmap bitmap1;
     public Bitmap outBitmap;
     public Bitmap resized ;
+    public Bitmap bicubic;
     public int[] lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
     private  int[]  intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
 
@@ -58,9 +62,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        // xml 파일에 정의된 TextView 객체 얻기
-        final TextView tv_output = findViewById(R.id.tv_output);
+        // TextView 객체 얻기
         final ImageView imageView = findViewById(R.id.imageView);
+        final ImageView imageView2 = findViewById(R.id.imageView2);
+        final ImageView imageView3 = findViewById(R.id.imageView3);
         imageView.setImageBitmap(resized);
 
         // R.id.button_1 : 첫 번째 버튼을 가리키는 id
@@ -118,14 +123,19 @@ public class MainActivity extends AppCompatActivity {
                 {
                     j = i%SR_IMAGE_WIDTH;
                     k = i/SR_IMAGE_WIDTH;
+
+                    output[0][k][j][0] = clamp(output[0][k][j][0], (float)0.0, (float)255.0);
+                    output[0][k][j][1] = clamp(output[0][k][j][1], (float)0.0, (float)255.0);
+                    output[0][k][j][2] = clamp(output[0][k][j][2], (float)0.0, (float)255.0);
+
 //            intOutValues[i] = 0xFF000000
 //                            | (((int) (outputs[i * 3] * 255)) << 16)
 //                            | (((int) (outputs[i * 3 + 1] * 255)) << 8)
 //                            | ((int) (outputs[i * 3 + 2] * 255));
                     intOutValues[i] = 0xFF000000
-                            | (((int) (output[0][k][j][0])) << 16)
-                            | (((int) (output[0][k][j][1])) << 8)
-                            | ((int) (output[0][k][j][2]));
+                            | ((round(output[0][k][j][0])) << 16)
+                            | ((round(output[0][k][j][1])) << 8)
+                            | ((round(output[0][k][j][2])));
 //            System.out.println( "r:" + String.valueOf(outputs[i * 3]) +";  g:" +String.valueOf((outputs[i * 3 + 1])
 //                    +";  b:" + String.valueOf(outputs[i * 3 + 2])));
                     //Log.d(TAG, "onClick: value" + output[0][k][j][0] + output[0][k][j][1] + output[0][k][j][2]);
@@ -135,8 +145,9 @@ public class MainActivity extends AppCompatActivity {
                 outBitmap = Bitmap.createBitmap(intOutValues,0,SR_IMAGE_WIDTH,SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
 
                 // 출력을 배열에 저장하기 때문에 0번째 요소를 가져와서 문자열로 변환
-                tv_output.setText(String.valueOf(output[0]));
-                imageView.setImageBitmap(outBitmap);
+                bicubic = resized.createScaledBitmap(bitmap1, SR_IMAGE_WIDTH, SR_IMAGE_HEIGHT, true);
+                imageView2.setImageBitmap(bicubic);
+                imageView3.setImageBitmap(outBitmap);
             }
         });
 
