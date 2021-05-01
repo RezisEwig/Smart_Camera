@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int UPSCALE_FACTOR = 4;
     private static final int SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
     private static final int SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
-    private static final int LL_IMAGE_HEIGHT = 800;
-    private static final int LL_IMAGE_WIDTH = 800;
+    private static final int LL_IMAGE_HEIGHT = 300;
+    private static final int LL_IMAGE_WIDTH = 300;
     private static final String LR_IMG_1 = "landscape.jpg";
     private static final String LL_IMG_1 = "low-light.png";
     public Bitmap bitmap1;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public Bitmap bicubic;
     public int[] lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
     public int[] lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
+    public int[]  intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
 
     public Interpreter.Options options = new Interpreter.Options();
     public CompatibilityList compatList = new CompatibilityList();
@@ -93,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     options.setNumThreads(4);
                 }
 
-                int[]  intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+
                 float[][][][] input = new float[1][LR_IMAGE_HEIGHT][LR_IMAGE_WIDTH][3];
                 int j = 0;
                 int k = 0;
@@ -121,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 // input : 텐서플로 모델의 placeholder에 전달할 데이터(3)
                 // output: 텐서플로 모델로부터 결과를 넘겨받을 배열. 덮어쓰기 때문에 초기값은 의미없다.
                 //int[] input = new int[]{3};
-                float[][][][] output = new float[1][SR_IMAGE_HEIGHT][SR_IMAGE_WIDTH][3];    // 15 = 3 * 5, out = x * 5
+                float[][][][] output = new float[1][SR_IMAGE_HEIGHT][SR_IMAGE_WIDTH][3];
 
                 //output = input;
 
@@ -166,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 outBitmap = Bitmap.createBitmap(intOutValues,0,SR_IMAGE_WIDTH,SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
 
                 // 출력을 배열에 저장하기 때문에 0번째 요소를 가져와서 문자열로 변환
-                bicubic = resized.createScaledBitmap(bitmap1, SR_IMAGE_WIDTH, SR_IMAGE_HEIGHT, true);
+                bicubic = Bitmap.createScaledBitmap(resized, SR_IMAGE_WIDTH, SR_IMAGE_HEIGHT, true);
                 imageView2.setImageBitmap(bicubic);
                 imageView3.setImageBitmap(outBitmap);
             }
@@ -191,9 +194,17 @@ public class MainActivity extends AppCompatActivity {
 
                 imageView.setImageBitmap(resized);
 
-                options.setNumThreads(4);
+                if(compatList.isDelegateSupportedOnThisDevice()){
+                    // if the device has a supported GPU, add the GPU delegate
+                    GpuDelegate.Options delegateOptions = compatList.getBestOptionsForThisDevice();
+                    GpuDelegate gpuDelegate = new GpuDelegate(delegateOptions);
+                    options.addDelegate(gpuDelegate);
+                } else {
+                    // if the GPU is not supported, run on 4 threads
+                    options.setNumThreads(4);
+                }
 
-                int[] highLightOutValues = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
+
                 float[][][][] input = new float[1][LL_IMAGE_HEIGHT][LL_IMAGE_WIDTH][3];
                 int j = 0;
                 int k = 0;
@@ -221,7 +232,8 @@ public class MainActivity extends AppCompatActivity {
                 // input : 텐서플로 모델의 placeholder에 전달할 데이터(3)
                 // output: 텐서플로 모델로부터 결과를 넘겨받을 배열. 덮어쓰기 때문에 초기값은 의미없다.
                 //int[] input = new int[]{3};
-                float[][][][] output = new float[1][LL_IMAGE_HEIGHT][LL_IMAGE_WIDTH][3];    // 15 = 3 * 5, out = x * 5
+                float[][][][] output = new float[1][LL_IMAGE_HEIGHT][LL_IMAGE_WIDTH][3];
+                float[][][][] output2 = new float[1][SR_IMAGE_HEIGHT][SR_IMAGE_WIDTH][3];
 
                 //output = input;
 
@@ -234,39 +246,67 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
+
+                for (int i = 0; i < LL_IMAGE_WIDTH*LL_IMAGE_HEIGHT; ++i) {
+                    j = i % LL_IMAGE_WIDTH;
+                    k = i / LL_IMAGE_WIDTH;
+
+                    output[0][k][j][0] = clamp(output[0][k][j][0] * 255, (float) 0.0, (float) 255.0);
+                    output[0][k][j][1] = clamp(output[0][k][j][1] * 255, (float) 0.0, (float) 255.0);
+                    output[0][k][j][2] = clamp(output[0][k][j][2] * 255, (float) 0.0, (float) 255.0);
+                }
+
+                try (Interpreter interpreter = new Interpreter(loadModelFile(MainActivity.this, MODEL_NAME), options)) {
+                    interpreter.run(output, output2);
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
                 // 모델 구동.
                 // 정확하게는 from_session 함수의 output_tensors 매개변수에 전달된 연산 호출
                 //tflite.run(input, output);
 
                 Log.d(TAG, "onCreate: asdasf" + output.length);
 
-                for (int i = 0; i < highLightOutValues.length; ++i)
+                for (int i = 0; i < intOutValues.length; ++i)
                 {
-                    j = i%LL_IMAGE_WIDTH;
-                    k = i/LL_IMAGE_WIDTH;
+                    j = i%SR_IMAGE_WIDTH;
+                    k = i/SR_IMAGE_WIDTH;
 
-                    output[0][k][j][0] = clamp(output[0][k][j][0] * 255, (float)0.0, (float)255.0);
-                    output[0][k][j][1] = clamp(output[0][k][j][1] * 255, (float)0.0, (float)255.0);
-                    output[0][k][j][2] = clamp(output[0][k][j][2] * 255, (float)0.0, (float)255.0);
+                    output2[0][k][j][0] = clamp(output2[0][k][j][0], (float)0.0, (float)255.0);
+                    output2[0][k][j][1] = clamp(output2[0][k][j][1], (float)0.0, (float)255.0);
+                    output2[0][k][j][2] = clamp(output2[0][k][j][2], (float)0.0, (float)255.0);
 
 //            intOutValues[i] = 0xFF000000
 //                            | (((int) (outputs[i * 3] * 255)) << 16)
 //                            | (((int) (outputs[i * 3 + 1] * 255)) << 8)
 //                            | ((int) (outputs[i * 3 + 2] * 255));
-                    highLightOutValues[i] = 0xFF000000
-                            | ((round(output[0][k][j][0])) << 16)
-                            | ((round(output[0][k][j][1])) << 8)
-                            | ((round(output[0][k][j][2])));
+                    intOutValues[i] = 0xFF000000
+                            | ((round(output2[0][k][j][0])) << 16)
+                            | ((round(output2[0][k][j][1])) << 8)
+                            | ((round(output2[0][k][j][2])));
 //            System.out.println( "r:" + String.valueOf(outputs[i * 3]) +";  g:" +String.valueOf((outputs[i * 3 + 1])
 //                    +";  b:" + String.valueOf(outputs[i * 3 + 2])));
                     //Log.d(TAG, "onClick: value" + output[0][k][j][0] + output[0][k][j][1] + output[0][k][j][2]);
                 }
 
 
-                outBitmap = Bitmap.createBitmap(highLightOutValues,0,LL_IMAGE_WIDTH,LL_IMAGE_WIDTH,LL_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
+                outBitmap = Bitmap.createBitmap(intOutValues,0,SR_IMAGE_WIDTH,SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
 
                 // 출력을 배열에 저장하기 때문에 0번째 요소를 가져와서 문자열로 변환
-                imageView2.setImageBitmap(outBitmap);
+                bicubic = Bitmap.createScaledBitmap(resized, SR_IMAGE_WIDTH, SR_IMAGE_HEIGHT, true);
+                imageView2.setImageBitmap(bicubic);
+                Bitmap overBitmap = Bitmap.createBitmap(SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
+                Paint paint = new Paint();
+                paint.setAlpha(180);
+                Canvas canvas = new Canvas(overBitmap);
+                canvas.drawBitmap(outBitmap, 0, 0, paint);
+                paint.setAlpha(80);
+                canvas.drawBitmap(bicubic, 0, 0, paint);
+                paint.setAlpha(255);
+                canvas.drawBitmap(overBitmap, 0, 0, paint);
+                imageView3.setImageBitmap(overBitmap);
             }
         });
 
