@@ -14,10 +14,5 @@
 .cxx
 local.properties
 *.tflite
-*.jpg
-*.png
-!500.jpg
 !v5_300.tflite
-!landscape.jpg
 !mirnet_int8.tflite
-!low-light.png

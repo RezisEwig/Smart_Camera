@@ -1,59 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    tools:context=".MainActivity">
+
+    // setAspectRatioTextureView(largestPreviewSize.getHeight(),largestPreviewSize.getWidth());을 주석처리 안했을때는 height : 200dp~300dp가 가장 왜곡이 없는 사이즈같음.
+    <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="50dp"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/imageView"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_gravity="center">
+        <ImageButton
+            android:id="@+id/take_photo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#00FFFFFF" />
+            android:layout_gravity="center_horizontal|bottom"
+            android:src="@android:drawable/ic_menu_camera"
+            android:layout_marginLeft="5dp"
 
-        <ImageView
-            android:id="@+id/imageView2"
+            />
+
+
+        <ToggleButton
+            android:id="@+id/superResolution"
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:background="@drawable/image_super_off"
+            android:textOff=""
+            android:textOn=""
+            android:layout_marginLeft="3dp"
+            android:padding="0sp"
+            android:scaleType="centerCrop"
+
+
+            />
+        <ToggleButton
+            android:id="@+id/lowLightEnhancement"
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:background="@drawable/image_light_off"
+            android:textOff=""
+            android:textOn=""
+            android:layout_marginLeft="3dp"
+            android:padding="0sp"
+            android:scaleType="centerCrop"
+
+            />
+        <ToggleButton
+            android:id="@+id/flickrOn"
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:background="@drawable/image_flickr_off"
+            android:textOff=""
+            android:textOn=""
+            android:layout_marginLeft="3dp"
+            android:padding="0sp"
+            android:scaleType="centerCrop"
+
+            />
+        <ImageButton
+            android:id="@+id/btn_cameraChange"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#00FFFFFF" />
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginLeft="3dp"
+            android:src="@android:drawable/ic_menu_camera"
+            />
 
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#00FFFFFF" />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button_1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="super-resolution"
-                android:textSize="19dp" />
-
-            <Button
-                android:id="@+id/button_2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="low-light enhancement"
-                android:textSize="15dp" />
-
-
-        </LinearLayout>
     </LinearLayout>
+
+
 
 </FrameLayout>

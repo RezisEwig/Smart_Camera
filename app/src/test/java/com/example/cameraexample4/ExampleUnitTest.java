@@ -1,4 +1,4 @@
-package com.example.simplelite;
+package com.example.cameraexample4;
 
 import org.junit.Test;
 
