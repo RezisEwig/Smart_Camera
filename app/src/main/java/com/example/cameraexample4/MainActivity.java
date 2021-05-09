@@ -17,11 +17,8 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
@@ -72,12 +69,6 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
-
-import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.gpu.CompatibilityList;
-import org.tensorflow.lite.gpu.GpuDelegate;
-import static androidx.core.math.MathUtils.clamp;
-import static java.lang.Math.round;
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -533,180 +524,12 @@ public class MainActivity extends AppCompatActivity{
                 e.printStackTrace();
             }
 
-            float ratio = 0.0f;
-
-            if (mDeviceRotation == 0 || mDeviceRotation == 180) {
-                ratio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
-            } else {
-                ratio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
-            }
+            AI ai = new AI(MainActivity.this, bitmap, mDeviceRotation);  // AI 객체 생성
 
             if (SR) {
-                String MODEL_NAME = "v5_300.tflite";
-                int LR_IMAGE_HEIGHT = 300;
-                int LR_IMAGE_WIDTH = 300;
-                int UPSCALE_FACTOR = 4;
-                int SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
-                int SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
-                int[] lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
-                int[] intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
-                Interpreter.Options options = new Interpreter.Options();
-                CompatibilityList compatList = new CompatibilityList();
-
-                Bitmap resized = Bitmap.createScaledBitmap(bitmap, LR_IMAGE_WIDTH, LR_IMAGE_HEIGHT, true);
-                resized.getPixels(
-                        lowResRGB, 0, LR_IMAGE_WIDTH, 0, 0, LR_IMAGE_WIDTH, LR_IMAGE_HEIGHT);
-
-                if(compatList.isDelegateSupportedOnThisDevice()){
-                    // if the device has a supported GPU, add the GPU delegate
-                    GpuDelegate.Options delegateOptions = compatList.getBestOptionsForThisDevice();
-                    GpuDelegate gpuDelegate = new GpuDelegate(delegateOptions);
-                    options.addDelegate(gpuDelegate);
-                } else {
-                    // if the GPU is not supported, run on 4 threads
-                    options.setNumThreads(4);
-                }
-
-                float[][][][] input = new float[1][LR_IMAGE_HEIGHT][LR_IMAGE_WIDTH][3];
-                int j = 0;
-                int k = 0;
-                for (int i = 0; i < lowResRGB.length; ++i)
-                {   j = i%LR_IMAGE_WIDTH;
-                    k = i/LR_IMAGE_WIDTH;
-                    final int val = lowResRGB[i];
-
-                    input[0][k][j][0] = ((val >> 16) & 0xFF) ;
-                    input[0][k][j][1] = (((val >> 8) & 0xFF)) ;
-                    input[0][k][j][2] = (val & 0xFF) ;
-                }
-
-                float[][][][] output = new float[1][SR_IMAGE_HEIGHT][SR_IMAGE_WIDTH][3];
-
-                try (Interpreter interpreter = new Interpreter(loadModelFile(MainActivity.this, MODEL_NAME), options)) {
-                    interpreter.run(input, output);
-                }catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                for (int i = 0; i < intOutValues.length; ++i)
-                {
-                    j = i%SR_IMAGE_WIDTH;
-                    k = i/SR_IMAGE_WIDTH;
-
-                    output[0][k][j][0] = clamp(output[0][k][j][0], (float)0.0, (float)255.0);
-                    output[0][k][j][1] = clamp(output[0][k][j][1], (float)0.0, (float)255.0);
-                    output[0][k][j][2] = clamp(output[0][k][j][2], (float)0.0, (float)255.0);
-
-                    intOutValues[i] = 0xFF000000
-                            | ((round(output[0][k][j][0])) << 16)
-                            | ((round(output[0][k][j][1])) << 8)
-                            | ((round(output[0][k][j][2])));
-                }
-
-                bitmap = Bitmap.createBitmap(intOutValues,0,SR_IMAGE_WIDTH,SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
-                if (mDeviceRotation == 0 || mDeviceRotation == 180) {
-                    bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(SR_IMAGE_WIDTH*ratio), SR_IMAGE_HEIGHT, true);
-                } else {
-                    bitmap = Bitmap.createScaledBitmap(bitmap, SR_IMAGE_WIDTH, Math.round(SR_IMAGE_HEIGHT*ratio), true);
-                }
-
-
+                bitmap = ai.Super_Resolution();             // 초해상도 작업 진행
             } else if (LL) {
-                String MODEL_NAME = "mirnet_int8.tflite";
-                String MODEL_NAME2 = "v5_300.tflite";
-                int LL_IMAGE_HEIGHT = 300;
-                int LL_IMAGE_WIDTH = 300;
-                int UPSCALE_FACTOR = 4;
-                int SR_IMAGE_HEIGHT = LL_IMAGE_HEIGHT * UPSCALE_FACTOR;
-                int SR_IMAGE_WIDTH = LL_IMAGE_WIDTH * UPSCALE_FACTOR;
-                int[] lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
-                int[] intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
-                Interpreter.Options options = new Interpreter.Options();
-                CompatibilityList compatList = new CompatibilityList();
-
-                Bitmap resized = Bitmap.createScaledBitmap(bitmap, LL_IMAGE_HEIGHT, LL_IMAGE_WIDTH, true);
-                resized.getPixels(
-                        lowLightRGB, 0, LL_IMAGE_WIDTH, 0, 0, LL_IMAGE_WIDTH, LL_IMAGE_HEIGHT);
-
-                if(compatList.isDelegateSupportedOnThisDevice()){
-                    // if the device has a supported GPU, add the GPU delegate
-                    GpuDelegate.Options delegateOptions = compatList.getBestOptionsForThisDevice();
-                    GpuDelegate gpuDelegate = new GpuDelegate(delegateOptions);
-                    options.addDelegate(gpuDelegate);
-                } else {
-                    // if the GPU is not supported, run on 4 threads
-                    options.setNumThreads(4);
-                }
-
-                float[][][][] input = new float[1][LL_IMAGE_HEIGHT][LL_IMAGE_WIDTH][3];
-                int j = 0;
-                int k = 0;
-                for (int i = 0; i < lowLightRGB.length; ++i)
-                {   j = i%LL_IMAGE_WIDTH;
-                    k = i/LL_IMAGE_WIDTH;
-                    final int val = lowLightRGB[i];
-                    input[0][k][j][0] = ((val >> 16) & 0xFF)/255.0f ;
-                    input[0][k][j][1] = (((val >> 8) & 0xFF))/255.0f ;
-                    input[0][k][j][2] = (val & 0xFF)/255.0f ;
-                }
-
-                float[][][][] output = new float[1][LL_IMAGE_HEIGHT][LL_IMAGE_WIDTH][3];
-                float[][][][] output2 = new float[1][SR_IMAGE_HEIGHT][SR_IMAGE_WIDTH][3];
-
-                try (Interpreter interpreter = new Interpreter(loadModelFile(MainActivity.this, MODEL_NAME), options)) {
-                    interpreter.run(input, output);
-                }catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                for (int i = 0; i < LL_IMAGE_WIDTH*LL_IMAGE_HEIGHT; ++i) {
-                    j = i % LL_IMAGE_WIDTH;
-                    k = i / LL_IMAGE_WIDTH;
-
-                    output[0][k][j][0] = clamp(output[0][k][j][0] * 255, (float) 0.0, (float) 255.0);
-                    output[0][k][j][1] = clamp(output[0][k][j][1] * 255, (float) 0.0, (float) 255.0);
-                    output[0][k][j][2] = clamp(output[0][k][j][2] * 255, (float) 0.0, (float) 255.0);
-                }
-
-                try (Interpreter interpreter = new Interpreter(loadModelFile(MainActivity.this, MODEL_NAME2), options)) {
-                    interpreter.run(output, output2);
-                }catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                for (int i = 0; i < intOutValues.length; ++i)
-                {
-                    j = i%SR_IMAGE_WIDTH;
-                    k = i/SR_IMAGE_WIDTH;
-
-                    output2[0][k][j][0] = clamp(output2[0][k][j][0], (float)0.0, (float)255.0);
-                    output2[0][k][j][1] = clamp(output2[0][k][j][1], (float)0.0, (float)255.0);
-                    output2[0][k][j][2] = clamp(output2[0][k][j][2], (float)0.0, (float)255.0);
-
-                    intOutValues[i] = 0xFF000000
-                            | ((round(output2[0][k][j][0])) << 16)
-                            | ((round(output2[0][k][j][1])) << 8)
-                            | ((round(output2[0][k][j][2])));
-                }
-
-                Bitmap bicubic = Bitmap.createScaledBitmap(resized, SR_IMAGE_WIDTH, SR_IMAGE_HEIGHT, true);
-                Bitmap outBitmap = Bitmap.createBitmap(intOutValues,0,SR_IMAGE_WIDTH,SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
-                Bitmap overBitmap = Bitmap.createBitmap(SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
-
-                Paint paint = new Paint();
-                paint.setAlpha(180);
-                Canvas canvas = new Canvas(overBitmap);
-                canvas.drawBitmap(outBitmap, 0, 0, paint);
-                paint.setAlpha(80);
-                canvas.drawBitmap(bicubic, 0, 0, paint);
-                paint.setAlpha(255);
-                canvas.drawBitmap(overBitmap, 0, 0, paint);
-                if (mDeviceRotation == 0 || mDeviceRotation == 180) {
-                    bitmap = Bitmap.createScaledBitmap(overBitmap, Math.round(SR_IMAGE_WIDTH*ratio), SR_IMAGE_HEIGHT, true);
-                } else {
-                    bitmap = Bitmap.createScaledBitmap(overBitmap, SR_IMAGE_WIDTH, Math.round(SR_IMAGE_HEIGHT*ratio), true);
-                }
-
+                bitmap = ai.Low_Light();                    // 저조도 작업 진행
             }
 
             insertImage(getContentResolver(), bitmap, ""+System.currentTimeMillis(), "");
@@ -715,18 +538,6 @@ public class MainActivity extends AppCompatActivity{
         }
 
     }
-
-    // 모델을 읽어오는 함수로, 텐서플로 라이트 홈페이지에 있다.
-    // MappedByteBuffer 바이트 버퍼를 Interpreter 객체에 전달하면 모델 해석을 할 수 있다.
-    private MappedByteBuffer loadModelFile(Activity activity, String modelPath) throws IOException {
-        AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(modelPath);
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-        FileChannel fileChannel = inputStream.getChannel();
-        long startOffset = fileDescriptor.getStartOffset();
-        long declaredLength = fileDescriptor.getDeclaredLength();
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
-    }
-
 
     // 출처 https://stackoverflow.com/a/43516672
     private void setAspectRatioTextureView(int ResolutionWidth , int ResolutionHeight )
