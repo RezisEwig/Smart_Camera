@@ -14,5 +14,7 @@
 .cxx
 local.properties
 *.tflite
-!v5_300.tflite
-!mirnet_int8.tflite
+!LL_horizontal.tflite
+!LL_vertical.tflite
+!SR_horizontal.tflite
+!SR_vertical.tflite

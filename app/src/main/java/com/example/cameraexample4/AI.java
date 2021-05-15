@@ -20,33 +20,55 @@ import static java.lang.Math.round;
 
 public class AI {
 
-    float ratio = 0.0f;     // 가로 세로 비율
     int mDeviceRotation;    // 0도, 90도, 180도, 270도 핸드폰 회전
     Bitmap bitmap;          // 처리할 이미지
     Activity activity;      // MainActivity
+    boolean horizontal;     // 가로일때 True, 세로일때 False
 
     public AI(Activity activity, Bitmap bitmap, int mDeviceRotation){       // 생성자
         this.activity = activity;
         this.bitmap = bitmap;
         this.mDeviceRotation = mDeviceRotation;
-        if (mDeviceRotation == 0 || mDeviceRotation == 180) {           // 핸드폰이 가로일때는 너비 나누기 높이
-            ratio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
-        } else {                                                        // 핸드폰이 세로일때는 높이 나누기 너비
-            ratio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
+        if (mDeviceRotation == 0 || mDeviceRotation == 180) {           // 핸드폰이 가로일때
+            this.horizontal = true;
+        } else {                                                        // 핸드폰이 세로일때
+            this.horizontal = false;
         }
     }
 
 
 
     public Bitmap Super_Resolution() {                  // 초해상도 작업
-        String MODEL_NAME = "v5_300.tflite";
-        int LR_IMAGE_HEIGHT = 300;
-        int LR_IMAGE_WIDTH = 300;
-        int UPSCALE_FACTOR = 4;
-        int SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
-        int SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
-        int[] lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
-        int[] intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+        String MODEL_NAME;
+        int LR_IMAGE_HEIGHT;
+        int LR_IMAGE_WIDTH;
+        int UPSCALE_FACTOR;
+        int SR_IMAGE_HEIGHT;
+        int SR_IMAGE_WIDTH;
+        int[] lowResRGB;
+        int[] intOutValues;
+
+        if (horizontal){
+            MODEL_NAME = "SR_horizontal.tflite";
+            LR_IMAGE_HEIGHT = 480;
+            LR_IMAGE_WIDTH = 640;
+            UPSCALE_FACTOR = 4;
+            SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
+            SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
+            lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
+            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+
+        } else {
+            MODEL_NAME = "SR_vertical.tflite";
+            LR_IMAGE_HEIGHT = 640;
+            LR_IMAGE_WIDTH = 480;
+            UPSCALE_FACTOR = 4;
+            SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
+            SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
+            lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
+            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+        }
+
         Interpreter.Options options = new Interpreter.Options();
         CompatibilityList compatList = new CompatibilityList();
 
@@ -101,30 +123,49 @@ public class AI {
         }
 
         bitmap = Bitmap.createBitmap(intOutValues,0,SR_IMAGE_WIDTH,SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);    // 1차원 배열을 Bitmap 객체로 변경
-        if (mDeviceRotation == 0 || mDeviceRotation == 180) {
-            bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(SR_IMAGE_WIDTH*ratio), SR_IMAGE_HEIGHT, true);        // 핸드폰이 가로일때는 가로를 늘려 줍니다
-        } else {
-            bitmap = Bitmap.createScaledBitmap(bitmap, SR_IMAGE_WIDTH, Math.round(SR_IMAGE_HEIGHT*ratio), true);        // 핸드폰이 세로일때는 세로를 늘려 줍니다
-        }
 
         return bitmap;
 
     }
 
     public Bitmap Low_Light() {                     // 저조도 향상 작업
-        String MODEL_NAME = "mirnet_int8.tflite";
-        String MODEL_NAME2 = "v5_300.tflite";
-        int LL_IMAGE_HEIGHT = 300;
-        int LL_IMAGE_WIDTH = 300;
-        int UPSCALE_FACTOR = 4;
-        int SR_IMAGE_HEIGHT = LL_IMAGE_HEIGHT * UPSCALE_FACTOR;
-        int SR_IMAGE_WIDTH = LL_IMAGE_WIDTH * UPSCALE_FACTOR;
-        int[] lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
-        int[] intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+        String MODEL_NAME;
+        String MODEL_NAME2;
+        int LL_IMAGE_HEIGHT;
+        int LL_IMAGE_WIDTH;
+        int UPSCALE_FACTOR;
+        int SR_IMAGE_HEIGHT;
+        int SR_IMAGE_WIDTH;
+        int[] lowLightRGB;
+        int[] intOutValues;
+
+        if (horizontal){
+            MODEL_NAME = "LL_horizontal.tflite";
+            MODEL_NAME2 = "SR_horizontal.tflite";
+            LL_IMAGE_HEIGHT = 480;
+            LL_IMAGE_WIDTH = 640;
+            UPSCALE_FACTOR = 4;
+            SR_IMAGE_HEIGHT = LL_IMAGE_HEIGHT * UPSCALE_FACTOR;
+            SR_IMAGE_WIDTH = LL_IMAGE_WIDTH * UPSCALE_FACTOR;
+            lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
+            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+
+        } else {
+            MODEL_NAME = "LL_vertical.tflite";
+            MODEL_NAME2 = "SR_vertical.tflite";
+            LL_IMAGE_HEIGHT = 640;
+            LL_IMAGE_WIDTH = 480;
+            UPSCALE_FACTOR = 4;
+            SR_IMAGE_HEIGHT = LL_IMAGE_HEIGHT * UPSCALE_FACTOR;
+            SR_IMAGE_WIDTH = LL_IMAGE_WIDTH * UPSCALE_FACTOR;
+            lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
+            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+        }
+
         Interpreter.Options options = new Interpreter.Options();
         CompatibilityList compatList = new CompatibilityList();
 
-        Bitmap resized = Bitmap.createScaledBitmap(bitmap, LL_IMAGE_HEIGHT, LL_IMAGE_WIDTH, true);      // 300x300으로 Resize
+        Bitmap resized = Bitmap.createScaledBitmap(bitmap, LL_IMAGE_WIDTH, LL_IMAGE_HEIGHT, true);      // 300x300으로 Resize
         resized.getPixels(                                                                                  // bitmap 객체 에서 1차원 배열으로
                 lowLightRGB, 0, LL_IMAGE_WIDTH, 0, 0, LL_IMAGE_WIDTH, LL_IMAGE_HEIGHT);
 
@@ -189,7 +230,7 @@ public class AI {
                     | ((round(output2[0][k][j][2])));           //BLUE
         }
 
-        Bitmap bicubic = Bitmap.createScaledBitmap(resized, SR_IMAGE_WIDTH, SR_IMAGE_HEIGHT, true);     // 원래 이미지를 고전적인 방법으로 늘리기
+        Bitmap bicubic = Bitmap.createScaledBitmap(bitmap, SR_IMAGE_WIDTH, SR_IMAGE_HEIGHT, true);     // 원래 이미지를 고전적인 방법으로 늘리기
         Bitmap outBitmap = Bitmap.createBitmap(intOutValues,0,SR_IMAGE_WIDTH,SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);      // 인공지능 결과물을 Bitmap으로 변경
         Bitmap overBitmap = Bitmap.createBitmap(SR_IMAGE_WIDTH,SR_IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);       // 최종 결과물이 될 도화지
 
@@ -201,13 +242,8 @@ public class AI {
         canvas.drawBitmap(bicubic, 0, 0, paint);        // 원래 이미지 늘린걸 투명도 80으로 색칠
         paint.setAlpha(255);                                    // 투명도 255(완전 불투명)로 설정
         canvas.drawBitmap(overBitmap, 0, 0, paint);     // 이미지 2개 합친걸 다시 덮어쓰기
-        if (mDeviceRotation == 0 || mDeviceRotation == 180) {
-            bitmap = Bitmap.createScaledBitmap(overBitmap, Math.round(SR_IMAGE_WIDTH*ratio), SR_IMAGE_HEIGHT, true);        // 핸드폰이 가로일때는 가로를 늘려 줍니다
-        } else {
-            bitmap = Bitmap.createScaledBitmap(overBitmap, SR_IMAGE_WIDTH, Math.round(SR_IMAGE_HEIGHT*ratio), true);        // 핸드폰이 세로일때는 세로를 늘려 줍니다
-        }
 
-        return bitmap;
+        return overBitmap;
 
     }
 
