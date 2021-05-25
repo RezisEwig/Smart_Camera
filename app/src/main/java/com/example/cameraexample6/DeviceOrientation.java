@@ -1,4 +1,4 @@
-package com.example.cameraexample4;
+package com.example.cameraexample6;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

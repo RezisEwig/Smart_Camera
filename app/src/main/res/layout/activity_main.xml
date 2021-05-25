@@ -1,58 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:id="@+id/background"
+    android:background="@color/black">
+
+
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/zoom"
+        android:max="90" />
 
     // setAspectRatioTextureView(largestPreviewSize.getHeight(),largestPreviewSize.getWidth());을 주석처리 안했을때는 height : 200dp~300dp가 가장 왜곡이 없는 사이즈같음.
     <SurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="50dp"
-        />
+        android:layout_height="546dp"
+        android:layout_marginTop="65dp"
+        app:layout_constraintBottom_toTopOf="@id/container"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingTop="15dp"
+        android:paddingBottom="50dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:orientation="horizontal"
-        android:layout_gravity="center">
-        <ImageButton
-            android:id="@+id/take_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:src="@android:drawable/ic_menu_camera"
-            android:layout_marginLeft="5dp"
+        android:layout_gravity="center"
+        android:background="@color/black"
+        app:layout_constraintHorizontal_bias="0.0">
 
-            />
+
+
+        <ImageView
+            android:id="@+id/cameraChangeButton"
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:src="@drawable/image_camera_change"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/take_photo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.7"
+            app:layout_constraintVertical_bias="0.503"
+            android:layout_marginLeft="30dp"/>
+
+        <ImageView
+            android:id="@+id/flashButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:src="@drawable/image_flash_off"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/cameraChangeButton"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="5dp"/>
 
 
         <ToggleButton
             android:id="@+id/superResolution"
             android:layout_width="51dp"
             android:layout_height="51dp"
-            android:layout_gravity="center_horizontal|bottom"
             android:background="@drawable/image_super_off"
             android:textOff=""
+            app:layout_constraintVertical_chainStyle="spread"
+            app:layout_constraintStart_toEndOf="@id/flickrOn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="6dp"
+            app:layout_constraintTop_toBottomOf="@id/lowLightEnhancement"
             android:textOn=""
-            android:layout_marginLeft="3dp"
             android:padding="0sp"
             android:scaleType="centerCrop"
-
-
             />
+
         <ToggleButton
             android:id="@+id/lowLightEnhancement"
             android:layout_width="51dp"
             android:layout_height="51dp"
-            android:layout_gravity="center_horizontal|bottom"
             android:background="@drawable/image_light_off"
+            app:layout_constraintStart_toStartOf="@id/superResolution"
+            app:layout_constraintEnd_toEndOf="@id/superResolution"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/superResolution"
+            android:layout_marginBottom="6dp"
             android:textOff=""
             android:textOn=""
-            android:layout_marginLeft="3dp"
             android:padding="0sp"
             android:scaleType="centerCrop"
 
@@ -61,26 +109,97 @@
             android:id="@+id/flickrOn"
             android:layout_width="51dp"
             android:layout_height="51dp"
-            android:layout_gravity="center_horizontal|bottom"
             android:background="@drawable/image_flickr_off"
+            app:layout_constraintStart_toEndOf="@+id/take_photo"
+            app:layout_constraintTop_toTopOf="@id/take_photo"
+            app:layout_constraintBottom_toBottomOf="@id/take_photo"
             android:textOff=""
             android:textOn=""
-            android:layout_marginLeft="3dp"
             android:padding="0sp"
             android:scaleType="centerCrop"
+            android:layout_marginLeft="20dp" />
 
-            />
         <ImageButton
-            android:id="@+id/btn_cameraChange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginLeft="3dp"
-            android:src="@android:drawable/ic_menu_camera"
-            />
+            android:id="@+id/hot_btn"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/image_hot"
+            android:padding="0sp"
+            android:scaleType="centerCrop"
+            android:textOff=""
+            android:textOn=""
+            app:layout_constraintBottom_toTopOf="@+id/cameraChangeButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintVertical_chainStyle="spread" />
 
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/my_btn"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="20dp"
+            android:textOff=""
+            android:textOn=""
+            android:background="@drawable/image_my"
+            android:padding="0sp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toTopOf="@+id/cameraChangeButton"
+            app:layout_constraintStart_toEndOf="@+id/hot_btn"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintVertical_chainStyle="spread" />
 
 
 
-</FrameLayout>
+
+
+        <ImageView
+            android:id="@+id/take_photo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/image_take_photo" />
+
+
+
+
+
+
+
+
+    <!--Button
+        android:id="@+id/captureImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@android:drawable/ic_menu_camera" /-->
+
+    <!--Button
+        android:id="@+id/flash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="25dp"
+        android:layout_toLeftOf="@id/captureImage"
+        android:background="@android:drawable/ic_menu_camera" /-->
+
+    <!--Button
+        android:id="@+id/flipCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="25dp"
+        android:layout_toRightOf="@id/take_photo"
+        android:background="@android:drawable/ic_menu_camera" /-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
