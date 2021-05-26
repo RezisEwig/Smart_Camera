@@ -1,4 +1,4 @@
-package com.example.cameraexample4;
+package com.example.cameraexample6;
 
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;

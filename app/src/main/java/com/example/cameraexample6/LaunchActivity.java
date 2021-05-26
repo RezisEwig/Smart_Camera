@@ -1,4 +1,4 @@
-package com.example.cameraexample4;
+package com.example.cameraexample6;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -18,6 +19,15 @@ public class LaunchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 상태바를 안보이도록 합니다.
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // 화면 켜진 상태를 유지합니다.
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         setContentView(R.layout.activity_launch);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -27,7 +37,7 @@ public class LaunchActivity extends AppCompatActivity {
                 //퍼미션 허가 안되어있다면 사용자에게 요청
                 requestPermissions(PERMISSIONS, PERMISSIONS_REQUEST_CODE);
             }else{
-                Intent mainIntent = new Intent(com.example.cameraexample4.LaunchActivity.this, MainActivity.class);
+                Intent mainIntent = new Intent(com.example.cameraexample6.LaunchActivity.this, MainActivity.class);
                 startActivity(mainIntent);
                 finish();
             }
@@ -78,7 +88,7 @@ public class LaunchActivity extends AppCompatActivity {
                         showDialogForPermission("앱을 실행하려면 퍼미션을 허가하셔야합니다.");
                     else
                     {
-                        Intent mainIntent = new Intent(com.example.cameraexample4.LaunchActivity.this, MainActivity.class);
+                        Intent mainIntent = new Intent(com.example.cameraexample6.LaunchActivity.this, MainActivity.class);
                         startActivity(mainIntent);
                         finish();
                     }
@@ -91,7 +101,7 @@ public class LaunchActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.M)
     private void showDialogForPermission(String msg) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder( com.example.cameraexample4.LaunchActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder( com.example.cameraexample6.LaunchActivity.this);
         builder.setTitle("알림");
         builder.setMessage(msg);
         builder.setCancelable(false);
