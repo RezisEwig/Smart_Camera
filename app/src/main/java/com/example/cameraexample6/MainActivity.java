@@ -5,11 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-<<<<<<< HEAD
 import java.io.OutputStream;
-=======
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -17,10 +13,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-<<<<<<< HEAD
 import android.content.ContentResolver;
-=======
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,14 +27,10 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
-<<<<<<< HEAD
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.ExifInterface;
 import android.net.Uri;
-=======
-import android.media.ExifInterface;
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -69,23 +58,17 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
 import static android.os.Environment.DIRECTORY_PICTURES;
-<<<<<<< HEAD
 //import static android.provider.MediaStore.Images.Media.insertImage;
-=======
-import static android.provider.MediaStore.Images.Media.insertImage;
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
+
 
 public class MainActivity extends Activity implements Callback, OnClickListener {
 
     private SurfaceView surfaceView;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
-<<<<<<< HEAD
     private Sensor mAccelerometer;
     private Sensor mMagnetometer;
     private SensorManager mSensorManager;
-=======
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
     //private Button flipCamera;
    // private Button flashCameraButton;
     //private Button captureImage;
@@ -145,12 +128,9 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         cameraChangeButton.setOnClickListener(this);
         take_photo.setOnClickListener(this);
         flashButton.setOnClickListener(this);
-<<<<<<< HEAD
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-=======
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
         deviceOrientation = new DeviceOrientation();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -300,7 +280,6 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
 
 
 
-<<<<<<< HEAD
     @Override
     protected void onResume() {
         super.onResume();
@@ -317,8 +296,6 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         mSensorManager.unregisterListener(deviceOrientation.getEventListener());
     }
 
-=======
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -533,7 +510,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
                     } else {
                         Toast.makeText(getBaseContext(), "Image Not saved",
                                 Toast.LENGTH_SHORT).show();
-<<<<<<< HEAD
+
                         return;
                     }
 
@@ -555,30 +532,6 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
 //
 //                    MainActivity.this.getContentResolver().insert(
 //                            Images.Media.EXTERNAL_CONTENT_URI, values);
-=======
-;
-                        return;
-                    }
-
-                    ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-
-                    // save image into gallery
-                    rotatedBitmap.compress(CompressFormat.JPEG, 100, ostream);
-
-                    FileOutputStream fout = new FileOutputStream(imageFile);
-                    fout.write(ostream.toByteArray());
-                    fout.close();
-                    ContentValues values = new ContentValues();
-
-                    values.put(Images.Media.DATE_TAKEN,
-                            System.currentTimeMillis());
-                    values.put(Images.Media.MIME_TYPE, "image/jpeg");
-                    values.put(MediaStore.MediaColumns.DATA,
-                            imageFile.getAbsolutePath());
-
-                    MainActivity.this.getContentResolver().insert(
-                            Images.Media.EXTERNAL_CONTENT_URI, values);
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -653,7 +606,6 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         }
     }
 
-<<<<<<< HEAD
     public static final String insertImage(ContentResolver cr,
                                            Bitmap source,
                                            String title,
@@ -700,8 +652,6 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         return stringUrl;
     }
 
-=======
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
     private class SaveImageTask extends AsyncTask<Bitmap, Void, Void> {
 
         @Override
@@ -730,10 +680,6 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
                 bitmap = ai.Low_Light();                    // 저조도 작업 진행
             }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
             insertImage(getContentResolver(), bitmap, ""+System.currentTimeMillis(), "");
 
 
