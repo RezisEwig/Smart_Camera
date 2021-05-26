@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.ErrorCallback;
@@ -37,8 +38,10 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.util.Log;
+import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
@@ -50,6 +53,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -83,6 +87,8 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
     private int rotation;
     private int mDeviceRotation;
     private DeviceOrientation deviceOrientation;
+
+    public ConstraintLayout.LayoutParams lp;
 
     Boolean SR = false;
     Boolean LL = false;
@@ -121,8 +127,16 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         take_photo = findViewById(R.id.take_photo);
 
 
+        Display display = this.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
 
         surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+        lp = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
+        lp.width = size.x;
+        lp.height = (lp.width*16)/9;
+        surfaceView.setLayoutParams(lp);
+
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
         cameraChangeButton.setOnClickListener(this);
@@ -307,10 +321,14 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         //오토포커스 참고 http://edu.popcornware.net/pop%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EC%B9%B4%EB%A9%94%EB%9D%BC-%EC%98%A4%ED%86%A0%ED%8F%AC%EC%BB%A4%EC%8A%A4-%EC%84%A4%EC%A0%95/
         Camera.Parameters params = camera.getParameters();
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+
         camera.setParameters(params);
 
         try {
             camera.setPreviewDisplay(holder);
+            Log.d("Preview Size", " " + camera.getParameters().getPreviewSize().width + camera.getParameters().getPreviewSize().height);
+            Log.d("Picture Size", " " + camera.getParameters().getPictureSize().width + camera.getParameters().getPictureSize().height);
+
         }
         catch(IOException e)
         {
@@ -322,6 +340,39 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
 
     }
 
+    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+        final double ASPECT_TOLERANCE = 0.05;
+        double targetRatio = (double) w / h;
+
+        if (sizes == null) return null;
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+        int targetHeight = h;
+
+        // Find size
+        for (Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            if (Math.abs(size.height - targetHeight) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
+            }
+        }
+
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+            for (Camera.Size size : sizes) {
+                if (Math.abs(size.height - targetHeight) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+        }
+        return optimalSize;
+    }
+
+
+
     private boolean openCamera(int id) {
         boolean result = false;
         cameraId = id;
@@ -331,6 +382,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         if (camera != null) {
             try {
                 setUpCamera(camera);
@@ -380,6 +432,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
             // frontFacing
             rotation = (info.orientation + degree) % 330;
             rotation = (360 - rotation) % 360;
+            Log.d("rotation", " " + rotation);
         } else {
             // Back-facing
             rotation = (info.orientation - degree + 360) % 360;
@@ -693,7 +746,12 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         if (degrees == 0) return bitmap;
 
         Matrix m = new Matrix();
-        m.setRotate(degrees, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+
+        if (cameraId == CameraInfo.CAMERA_FACING_BACK) {
+            m.setRotate(degrees, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+        } else {
+            m.setRotate((360 - degrees) % 360, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+        }
 
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
     }
