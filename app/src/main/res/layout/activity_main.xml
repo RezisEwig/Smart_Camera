@@ -20,7 +20,11 @@
     <SurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
+<<<<<<< HEAD
         android:layout_height="wrap_content"
+=======
+        android:layout_height="546dp"
+>>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
         android:layout_marginTop="65dp"
         app:layout_constraintBottom_toTopOf="@id/container"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -61,8 +65,13 @@
 
         <ImageView
             android:id="@+id/flashButton"
+<<<<<<< HEAD
             android:layout_width="50dp"
             android:layout_height="50dp"
+=======
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+>>>>>>> d1645f0ea3864dd1deb4ba5c5c0f4969564e1bd8
             android:layout_gravity="center_horizontal|bottom"
             android:src="@drawable/image_flash_off"
             app:layout_constraintTop_toTopOf="parent"
