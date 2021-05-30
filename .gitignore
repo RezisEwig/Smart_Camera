@@ -15,6 +15,4 @@
 local.properties
 *.tflite
 !LL_horizontal.tflite
-!LL_vertical.tflite
 !SR_horizontal.tflite
-!SR_vertical.tflite

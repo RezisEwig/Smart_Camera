@@ -320,15 +320,12 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         //set camera to continually auto-focus
         //오토포커스 참고 http://edu.popcornware.net/pop%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EC%B9%B4%EB%A9%94%EB%9D%BC-%EC%98%A4%ED%86%A0%ED%8F%AC%EC%BB%A4%EC%8A%A4-%EC%84%A4%EC%A0%95/
         Camera.Parameters params = camera.getParameters();
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         camera.setParameters(params);
 
         try {
             camera.setPreviewDisplay(holder);
-            Log.d("Preview Size", " " + camera.getParameters().getPreviewSize().width + camera.getParameters().getPreviewSize().height);
-            Log.d("Picture Size", " " + camera.getParameters().getPictureSize().width + camera.getParameters().getPictureSize().height);
-
         }
         catch(IOException e)
         {
@@ -356,6 +353,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
             if (Math.abs(size.height - targetHeight) < minDiff) {
                 optimalSize = size;
                 minDiff = Math.abs(size.height - targetHeight);
+                break;
             }
         }
 
@@ -395,6 +393,24 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
                 });
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.startPreview();
+
+                Camera.Parameters params = camera.getParameters();
+                List<Camera.Size> pictureSizeList = params.getSupportedPictureSizes();
+                List<Camera.Size> previewSizeList = params.getSupportedPreviewSizes();
+//                for(Camera.Size size : pictureSizeList){
+//                    Log.d("##PictureSize##", "width: "+size.width+ "height :"+size.height);
+//                } //지원하는 사진의 크기
+                Camera.Size size = getOptimalPreviewSize(pictureSizeList, 4, 3);
+                params.setPictureSize(size.width, size.height);
+                size = getOptimalPreviewSize(previewSizeList, 16, 9);
+                params.setPreviewSize(size.width, size.height);
+
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                camera.setParameters(params);
+
+                Log.d("Preview Size", " " + camera.getParameters().getPreviewSize().width + camera.getParameters().getPreviewSize().height);
+                Log.d("Picture Size", " " + camera.getParameters().getPictureSize().width + camera.getParameters().getPictureSize().height);
+
                 result = true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -451,6 +467,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         }
 
         params.setRotation(rotation);
+        c.setParameters(params);
     }
 
     private void showFlashButton(Parameters params) {
@@ -719,18 +736,26 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
 
             Bitmap bitmap = null;
             try {
-
-                bitmap = getRotatedBitmap(data[0], mDeviceRotation); //넣어보기
+                bitmap = data[0];
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            AI ai = new AI(MainActivity.this, bitmap, mDeviceRotation);  // AI 객체 생성
+            int tempRotate = mDeviceRotation;
+            int tempCameraId = cameraId;
+
+            AI ai = new AI(MainActivity.this, bitmap);  // AI 객체 생성
 
             if (SR) {
                 bitmap = ai.Super_Resolution();             // 초해상도 작업 진행
             } else if (LL) {
                 bitmap = ai.Low_Light();                    // 저조도 작업 진행
+            }
+
+            try {
+                bitmap = getRotatedBitmap(bitmap, tempRotate, tempCameraId);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             insertImage(getContentResolver(), bitmap, ""+System.currentTimeMillis(), "");
@@ -741,7 +766,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
 
     }
 
-    public Bitmap getRotatedBitmap(Bitmap bitmap, int degrees) throws Exception {
+    public Bitmap getRotatedBitmap(Bitmap bitmap, int degrees, int cameraInfo) throws Exception {
         if(bitmap == null) return null;
         if (degrees == 0) return bitmap;
 

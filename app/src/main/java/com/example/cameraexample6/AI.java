@@ -20,20 +20,12 @@ import static java.lang.Math.round;
 
 public class AI {
 
-    int mDeviceRotation;    // 0도, 90도, 180도, 270도 핸드폰 회전
     Bitmap bitmap;          // 처리할 이미지
     Activity activity;      // MainActivity
-    boolean horizontal;     // 가로일때 True, 세로일때 False
 
-    public AI(Activity activity, Bitmap bitmap, int mDeviceRotation){       // 생성자
+    public AI(Activity activity, Bitmap bitmap){       // 생성자
         this.activity = activity;
         this.bitmap = bitmap;
-        this.mDeviceRotation = mDeviceRotation;
-        if (mDeviceRotation == 0 || mDeviceRotation == 180) {           // 핸드폰이 가로일때
-            this.horizontal = true;
-        } else {                                                        // 핸드폰이 세로일때
-            this.horizontal = false;
-        }
     }
 
 
@@ -48,26 +40,15 @@ public class AI {
         int[] lowResRGB;
         int[] intOutValues;
 
-        if (horizontal){
-            MODEL_NAME = "SR_horizontal.tflite";
-            LR_IMAGE_HEIGHT = 480;
-            LR_IMAGE_WIDTH = 640;
-            UPSCALE_FACTOR = 4;
-            SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
-            SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
-            lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
-            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+        MODEL_NAME = "SR_horizontal.tflite";
+        LR_IMAGE_HEIGHT = 480;
+        LR_IMAGE_WIDTH = 640;
+        UPSCALE_FACTOR = 4;
+        SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
+        SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
+        lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
+        intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
 
-        } else {
-            MODEL_NAME = "SR_vertical.tflite";
-            LR_IMAGE_HEIGHT = 640;
-            LR_IMAGE_WIDTH = 480;
-            UPSCALE_FACTOR = 4;
-            SR_IMAGE_HEIGHT = LR_IMAGE_HEIGHT * UPSCALE_FACTOR;
-            SR_IMAGE_WIDTH = LR_IMAGE_WIDTH * UPSCALE_FACTOR;
-            lowResRGB = new int[LR_IMAGE_HEIGHT * LR_IMAGE_WIDTH];
-            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
-        }
 
         Interpreter.Options options = new Interpreter.Options();
         CompatibilityList compatList = new CompatibilityList();
@@ -139,28 +120,17 @@ public class AI {
         int[] lowLightRGB;
         int[] intOutValues;
 
-        if (horizontal){
-            MODEL_NAME = "LL_horizontal.tflite";
-            MODEL_NAME2 = "SR_horizontal.tflite";
-            LL_IMAGE_HEIGHT = 480;
-            LL_IMAGE_WIDTH = 640;
-            UPSCALE_FACTOR = 4;
-            SR_IMAGE_HEIGHT = LL_IMAGE_HEIGHT * UPSCALE_FACTOR;
-            SR_IMAGE_WIDTH = LL_IMAGE_WIDTH * UPSCALE_FACTOR;
-            lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
-            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
 
-        } else {
-            MODEL_NAME = "LL_vertical.tflite";
-            MODEL_NAME2 = "SR_vertical.tflite";
-            LL_IMAGE_HEIGHT = 640;
-            LL_IMAGE_WIDTH = 480;
-            UPSCALE_FACTOR = 4;
-            SR_IMAGE_HEIGHT = LL_IMAGE_HEIGHT * UPSCALE_FACTOR;
-            SR_IMAGE_WIDTH = LL_IMAGE_WIDTH * UPSCALE_FACTOR;
-            lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
-            intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
-        }
+        MODEL_NAME = "LL_horizontal.tflite";
+        MODEL_NAME2 = "SR_horizontal.tflite";
+        LL_IMAGE_HEIGHT = 480;
+        LL_IMAGE_WIDTH = 640;
+        UPSCALE_FACTOR = 4;
+        SR_IMAGE_HEIGHT = LL_IMAGE_HEIGHT * UPSCALE_FACTOR;
+        SR_IMAGE_WIDTH = LL_IMAGE_WIDTH * UPSCALE_FACTOR;
+        lowLightRGB = new int[LL_IMAGE_HEIGHT * LL_IMAGE_WIDTH];
+        intOutValues = new int[SR_IMAGE_HEIGHT * SR_IMAGE_WIDTH];
+
 
         Interpreter.Options options = new Interpreter.Options();
         CompatibilityList compatList = new CompatibilityList();
