@@ -51,6 +51,7 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -68,19 +69,20 @@ import static android.os.Environment.DIRECTORY_PICTURES;
 public class MainActivity extends Activity implements Callback, OnClickListener {
 
     private SurfaceView surfaceView;
+    private ZoomLayout zoomLayout;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
     private Sensor mAccelerometer;
     private Sensor mMagnetometer;
     private SensorManager mSensorManager;
     //private Button flipCamera;
-   // private Button flashCameraButton;
+    //private Button flashCameraButton;
     //private Button captureImage;
+
 
     private ImageView take_photo;
     private ImageView flashButton;
     private ImageView cameraChangeButton;
-
 
     private int cameraId;
     private boolean flashmode = false;
@@ -88,7 +90,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
     private int mDeviceRotation;
     private DeviceOrientation deviceOrientation;
 
-    public ConstraintLayout.LayoutParams lp;
+    public ZoomLayout.LayoutParams lp;
 
     Boolean SR = false;
     Boolean LL = false;
@@ -131,10 +133,13 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
         Point size = new Point();
         display.getSize(size);
 
+        zoomLayout = findViewById(R.id.zoomlayout);
         surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
-        lp = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
+        surfaceView.getHolder().addCallback(this);
+        lp = (ZoomLayout.LayoutParams) surfaceView.getLayoutParams();
         lp.width = size.x;
         lp.height = (lp.width*16)/9;
+        lp.topMargin = 150;
         surfaceView.setLayoutParams(lp);
 
         surfaceHolder = surfaceView.getHolder();

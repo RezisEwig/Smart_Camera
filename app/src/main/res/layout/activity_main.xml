@@ -14,21 +14,32 @@
         android:layout_height="match_parent"
         android:layout_marginTop="20dp">
 
+        <com.example.cameraexample6.ZoomLayout
+            android:id="@+id/zoomlayout"
+            android:layout_width="match_parent"
+            android:layout_height="675dp"
+            android:measureAllChildren="true"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="60dp">
+
+            //
+            setAspectRatioTextureView(largestPreviewSize.getHeight(),largestPreviewSize.getWidth());을
+            주석처리 안했을때는 height : 200dp~300dp가 가장 왜곡이 없는 사이즈같음.
+
+            <SurfaceView
+                android:id="@+id/surfaceView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </com.example.cameraexample6.ZoomLayout>
+
         <SeekBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/zoom"
             android:max="90" />
-
-
-        // setAspectRatioTextureView(largestPreviewSize.getHeight(),largestPreviewSize.getWidth());을 주석처리 안했을때는 height : 200dp~300dp가 가장 왜곡이 없는 사이즈같음.
-        <SurfaceView
-            android:id="@+id/surfaceView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="45dp"
-            app:layout_constraintTop_toTopOf="parent"/>
-
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/container"
