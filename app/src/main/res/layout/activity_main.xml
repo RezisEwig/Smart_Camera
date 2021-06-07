@@ -38,8 +38,7 @@
         <SeekBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/zoom"
-            android:max="90" />
+            android:id="@+id/zoom"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/container"

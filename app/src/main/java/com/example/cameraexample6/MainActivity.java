@@ -76,13 +76,13 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
     private Sensor mMagnetometer;
     private SensorManager mSensorManager;
     //private Button flipCamera;
-    //private Button flashCameraButton;
+   // private Button flashCameraButton;
     //private Button captureImage;
-
 
     private ImageView take_photo;
     private ImageView flashButton;
     private ImageView cameraChangeButton;
+
 
     private int cameraId;
     private boolean flashmode = false;
@@ -165,6 +165,7 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
 
 
 
+
         ZoomseekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -173,6 +174,8 @@ public class MainActivity extends Activity implements Callback, OnClickListener 
                 Camera.Parameters p = camera.getParameters();
                 int maxZoom = p.getMaxZoom();
                 int zoom = p.getZoom();
+                ZoomseekBar.setMax(maxZoom);
+                //Log.d("MaxZoom= ",maxZoom+"");
 
                 if (p.isZoomSupported()) {
                     zoom += 10;

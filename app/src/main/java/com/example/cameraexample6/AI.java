@@ -53,7 +53,7 @@ public class AI {
         Interpreter.Options options = new Interpreter.Options();
         CompatibilityList compatList = new CompatibilityList();
 
-        Bitmap resized = Bitmap.createScaledBitmap(bitmap, LR_IMAGE_WIDTH, LR_IMAGE_HEIGHT, true);      // 300x300으로 Resize
+        Bitmap resized = Bitmap.createScaledBitmap(bitmap, LR_IMAGE_WIDTH, LR_IMAGE_HEIGHT, true);      // 640x480으로 Resize
         resized.getPixels(                                                                                  // bitmap 객체 에서 1차원 배열으로
                 lowResRGB, 0, LR_IMAGE_WIDTH, 0, 0, LR_IMAGE_WIDTH, LR_IMAGE_HEIGHT);
 
@@ -135,7 +135,7 @@ public class AI {
         Interpreter.Options options = new Interpreter.Options();
         CompatibilityList compatList = new CompatibilityList();
 
-        Bitmap resized = Bitmap.createScaledBitmap(bitmap, LL_IMAGE_WIDTH, LL_IMAGE_HEIGHT, true);      // 300x300으로 Resize
+        Bitmap resized = Bitmap.createScaledBitmap(bitmap, LL_IMAGE_WIDTH, LL_IMAGE_HEIGHT, true);      // 640x480으로 Resize
         resized.getPixels(                                                                                  // bitmap 객체 에서 1차원 배열으로
                 lowLightRGB, 0, LL_IMAGE_WIDTH, 0, 0, LL_IMAGE_WIDTH, LL_IMAGE_HEIGHT);
 
